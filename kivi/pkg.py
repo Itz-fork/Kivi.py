@@ -2,6 +2,7 @@
 # Project: Kivi.py
 
 import json
+from re import match, search
 from os import path, getcwd, mkdir
 
 from kivi.extensions.tools import run_on_thread
@@ -36,7 +37,7 @@ class Kivi(object):
         Arguments:
             name: Name of the database
             data: Dict consist of data
-        
+
         Example:
             ```py
             db.kv_create("wow", {"user-1": 123456})
@@ -52,7 +53,7 @@ class Kivi(object):
 
         Arguments:
             data: Path to a json file or python dict
-        
+
         Returns:
             Index of the database
 
@@ -137,7 +138,41 @@ class Kivi(object):
         except KeyError as e:
             raise KeyError(f"Value doesn't exists in database at index {index}") from e
         except IndexError as e:
-            raise IndexError(f'{e} \n\nPerhaps you forgot to run `db.kv_load(path)` ?') from e
+            raise IndexError(
+                f"{e} \n\nPerhaps you forgot to run `db.kv_load(path)` ?"
+            ) from e
+
+    def kv_search(self, index: int, query: str, strict: bool = True):
+        """
+        Search for string in a database
+
+        Arguments:
+            index: Index of the database (returned in kv_load or when creating the instance)
+            query: String to search for in the database
+            strict: Pass 'False' to get more results
+
+        Example:
+            ```py
+            db.kv_search(0, "Spider man")
+            ```
+        """
+        _tdb = self.KV_DB[index]["items"]
+        _sfnc = match if strict else search
+        qry = query.split(" ")
+        rgx = (
+            r"(?i)([+" + qry.pop(0) + "]+\s)" + "".join(f"|(\b[+{i}]+\s)" for i in qry)
+            if len(qry) > 1
+            else f"(?i)([+{query}]+\s)"
+        )
+        return list(
+            filter(
+                str.strip,
+                map(
+                    lambda i: i[1][0] if _sfnc(rgx, i[1][0]) else "",
+                    _tdb["items"].items(),
+                ),
+            )
+        )
 
     def _kv_format(self, data: dict) -> dict:
         return dict(

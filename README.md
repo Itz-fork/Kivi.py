@@ -118,6 +118,19 @@ Merge data into the database
 > [!Note]
 > If the `tomerge` dict is not in the kivi formatting, set `to_std = True`
 
+##### Search
+Search for string in a database
+
+- Arguments:
+    - `index`: Index of the database (returned in kv_load or when creating the instance)
+    - `query`: String to search for in the database
+    - `strict`: Pass 'False' to get more results
+
+- Example:
+    ```py
+    db.kv_search(0, "Spider man")
+    ```
+
 ##### Load
 Loads database into the memory
 

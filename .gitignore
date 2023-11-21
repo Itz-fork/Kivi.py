@@ -1,5 +1,5 @@
 .venv
-.kv_db
+.kivi_db
 clear
 tests
 db_test.py
