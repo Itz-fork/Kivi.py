@@ -1,0 +1,25 @@
+{
+    "name": "lot_new",
+    "items": {
+        "thing-1": [
+            "[123, True, {'user': 'gibberish?#45', 'nuh': True}]",
+            "list"
+        ],
+        "thing-2": [
+            "[123, True, {'user': 'gibberish?#45', 'nuh': True}]",
+            "list"
+        ],
+        "thing-3": [
+            "[123, True, {'user': 'gibberish?#45', 'nuh': True}]",
+            "list"
+        ],
+        "thing-4": [
+            "[123, True, {'user': 'gibberish?#45', 'nuh': True}]",
+            "list"
+        ],
+        "thing-5": [
+            "[123, True, {'user': 'gibberish?#45', 'nuh': True}]",
+            "list"
+        ]
+    }
+}
