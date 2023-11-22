@@ -169,7 +169,7 @@ class Kivi(object):
             filter(
                 str.strip,
                 map(
-                    lambda i: i[1][0] if _sfnc(rgx, i[1][0]) else "",
+                    lambda i: {i[0]: i[1][0]} if _sfnc(rgx, i[1][0]) else "",
                     _tdb["items"].items(),
                 ),
             )
