@@ -116,6 +116,7 @@ class Kivi(object):
         if to_std:
             tomerge = self._kv_format(tomerge)
         self.KV_DB[index]["items"] = {**_svdb, **tomerge}
+        self._kv_save(index=index)
 
     def kv_set(self, index: int, key: str, data):
         """
