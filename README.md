@@ -1,8 +1,16 @@
 # Kivi.py 🥝
+
+```py
+from kivi import Kivi
+
+db = Kivi()
+db.kv_create("mydb", {"greeting-1": "Good morning 🌅"})
+```
+
 A simple key-value database that uses [JSON](https://www.json.org/json-en.html) to store data
 
-## Supported data types
 
+## Supported data types
 - String
 - Boolean
 - Integer
@@ -11,44 +19,20 @@ A simple key-value database that uses [JSON](https://www.json.org/json-en.html) 
 - Dict
 - Datetime
 
+
 ## Why?
 I just wanted a simple database to play around, why everything is so complex
 
-<img src="assests/crying.jpg" width=200, height=auto />
+<img src="https://raw.githubusercontent.com/Itz-fork/Kivi.py/main/assests/crying.jpg" width=200, height=auto />
 
 
-## How it works
-Data is stored inside json files in the following format
+## Install
 
-```json
-{
-    "name": "lot",
-    "items": {...}
-}
 ```
-
-`items` contains the inserted data as a string alongside it's original data type like this,
-```json
-{
-    "name": "lot",
-    "items": {
-        "thing-1": [
-            "{'user': 'gibberish?#45'}",
-            "dict"
-        ],
-        "thing-2": [
-            "{'user': 'gibberish?#45'}",
-            "dict"
-        ]
-    }
-}
+pip install kivi.py
 ```
-
-When you request data using `kv_get` function, data will be automatically converted back to it's original type ([limitations](#limitations))
-
 
 ## Usage
-
 - [Init](#initialize-database)
 - [Create](#create)
 - [Load](#load)
@@ -209,8 +193,37 @@ Search for string in a database
     ```
 
 
-## Requirements
+## How it works
+Data is stored inside json files in the following format
 
+```json
+{
+    "name": "lot",
+    "items": {...}
+}
+```
+
+`items` contains the inserted data as a string alongside it's original data type like this,
+```json
+{
+    "name": "lot",
+    "items": {
+        "thing-1": [
+            "{'user': 'gibberish?#45'}",
+            "dict"
+        ],
+        "thing-2": [
+            "{'user': 'gibberish?#45'}",
+            "dict"
+        ]
+    }
+}
+```
+
+When you request data using `kv_get` function, data will be automatically converted back to it's original type ([limitations](#limitations))
+
+
+## Requirements
 - Python 3.5+
     - [dependecies](requirements.txt)
 
