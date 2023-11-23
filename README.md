@@ -159,9 +159,11 @@ Merge data into the database
 ---
 
 ### Index
+**WIP**
+
 Index data to perform queries much faster
 
--Arguments:
+- Arguments:
     - `data`: Data to index (a dict or list of dicts)
     - `fields`: Json fields that needs to be indexed
     - `chars`: Amount of characters that indexed key can have (Ex: "Spider" will be sliced to "spi" to create the key for index)
