@@ -1,4 +1,4 @@
-# Author: Itz-fork
+# Author: https://github.com/Itz-fork
 # Project: Kivi.py
 
 class KV_NODATA(Exception):

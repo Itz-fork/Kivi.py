@@ -3,3 +3,5 @@
 clear
 tests
 db_test.py
+dist/
+kivi.py.egg-info/

@@ -1,4 +1,4 @@
-# Author: Itz-fork
+# Author: https://github.com/Itz-fork
 # Project: Kivi.py
 
 import json, re, sys
@@ -90,8 +90,8 @@ class Kivi(object):
         try:
             frm_db = self.KV_DB[index]["items"][key]
             return data_conv(frm_db[0], frm_db[1])
-        except KeyError:
-            return f"Value doesn't exists in database at index {index}"
+        except KeyError as e:
+            raise KeyError(f"Value doesn't exists in database at index {index}") from e
 
     def kv_merge(self, index: int, tomerge: dict, to_std: bool = True):
         """
@@ -213,7 +213,7 @@ class Kivi(object):
             data: Data to index (a dict or list of dicts)
             fields: Json fields that needs to be indexed
             chars: Amount of characters that indexed key can have (Ex: "Spider" will be sliced to "spi" to create the key for index)
-        
+
         Example:
             ```py
             data = [
@@ -223,7 +223,9 @@ class Kivi(object):
             db.kv_index(data, ["title", "extract"], 3)
             ```
         """
-        print(f"Items to index: {len(data)}\nIndexing started. This may take a while...")
+        print(
+            f"Items to index: {len(data)}\nIndexing started. This may take a while..."
+        )
         _tmal = {}
 
         # search for fields and creates a index
