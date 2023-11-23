@@ -1,14 +1,15 @@
 # Author: Itz-fork
 # Project: Kivi.py
 
-import json
-from re import match, search
+import json, re, sys
 from os import path, getcwd, mkdir
 
-from kivi.extensions.tools import run_on_thread
 from kivi.extensions.converter import data_conv
+from kivi.extensions.tools import run_on_thread, slice_dict
 
 from kivi.erros import KV_NODATA
+
+# sys.
 
 
 class Kivi(object):
@@ -82,7 +83,7 @@ class Kivi(object):
             key: Key!
 
         Example:
-            ```
+            ```py
             db.kv_get(0, "greeting")
             ```
         """
@@ -149,7 +150,7 @@ class Kivi(object):
 
         Arguments:
             index: Index of the database (returned in kv_load or when creating the instance)
-            query: String to search for in the database
+            query: String to re.search for in the database
             strict: Pass 'False' to get more results
 
         Example:
@@ -158,7 +159,7 @@ class Kivi(object):
             ```
         """
         _tdb = self.KV_DB[index]["items"]
-        _sfnc = match if strict else search
+        _sfnc = re.match if strict else re.search
         qry = query.split(" ")
         rgx = (
             r"(?i)([+" + qry.pop(0) + "]+\s)" + "".join(f"|(\b[+{i}]+\s)" for i in qry)
@@ -175,6 +176,81 @@ class Kivi(object):
             )
         )
 
+    def kv_query(self, index: int, query: str, chars: int = 3):
+        """
+        WIP
+
+        Search for string in an indexed database
+
+        Arguments:
+            index: Index of the database (returned in kv_load or when creating the instance)
+            query: String to search for in the database
+            chars: Set this to the value you used when indexing data
+
+        Example:
+            ```py
+            db.kv_query(0, "Spider man")
+            ```
+        """
+        query = query.lower()
+        _tdb = self.KV_DB[index]
+        qry = query.split(" ")
+        results = []
+        for q in qry:
+            _tlist = _tdb[q[:chars]]
+            rgx = rf"(?i)([+{q}])"
+            while _tlist:
+                itm = _tlist.pop()
+                if re.match(rgx, itm["searchable"]) and itm["origin"] not in results:
+                    results.append(itm["origin"])
+        return results
+
+    def kv_index(self, data: dict | list, fields: list, chars: int = 3):
+        """
+        Index data to perform queries much faster
+
+        Arguments:
+            data: Data to index (a dict or list of dicts)
+            fields: Json fields that needs to be indexed
+            chars: Amount of characters that indexed key can have (Ex: "Spider" will be sliced to "spi" to create the key for index)
+        
+        Example:
+            ```py
+            data = [
+                {"title": "Spooder man", "extract": "Marvel spooder man!"},
+                {"title": "Iron deficiency man", "extract": "Marvel no Fe?"}
+            ]
+            db.kv_index(data, ["title", "extract"], 3)
+            ```
+        """
+        print(f"Items to index: {len(data)}\nIndexing started. This may take a while...")
+        _tmal = {}
+
+        # search for fields and creates a index
+        def index_from_fields(sdt):
+            for k, v in sdt.items():
+                if isinstance(v, dict):
+                    return index_from_fields(v)
+                if k in fields:
+                    _lvrs = [re.sub("\W+", "", _spl) for _spl in str(v).split(" ")]
+                    for _tv in _lvrs:
+                        if not _tv:
+                            pass
+                        _vchr = str(_tv)[:chars].lower()
+                        _rs = _tmal.get(_vchr)
+                        if _rs:
+                            _rs.append({"searchable": _tv, "origin": {k: v}})
+                        else:
+                            _tmal[_vchr] = [{"searchable": _tv, "origin": {k: v}}]
+
+        if isinstance(data, list):
+            for di in data:
+                index_from_fields(di)
+        else:
+            index_from_fields(data)
+        print("Indexing finished")
+        self._kv_save(name="movie_indexed", data=_tmal)
+
     def _kv_format(self, data: dict) -> dict:
         return dict(
             map(
@@ -184,7 +260,7 @@ class Kivi(object):
         )
 
     @run_on_thread
-    def _kv_save(self, index: int = None, data: dict = None):
+    def _kv_save(self, name: str = None, index: int = None, data: dict = None):
         """
         Save the database into a json file
 
@@ -194,7 +270,7 @@ class Kivi(object):
         """
         _svdb = data if data else self.KV_DB[index] if isinstance(index, int) else {}
         if _svdb:
-            _jpth = f"{self.kv_src}/{_svdb['name']}.json"
+            _jpth = f"{self.kv_src}/{name if name else _svdb['name']}.json"
             with open(_jpth, "w", encoding="utf-8") as tosav:
                 json.dump(_svdb, tosav, indent=4, ensure_ascii=False)
                 # tosav.truncate()

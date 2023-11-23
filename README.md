@@ -1,5 +1,5 @@
 # Kivi.py 🥝
-A simple toy key-value database that uses [JSON](https://www.json.org/json-en.html) to store data
+A simple key-value database that uses [JSON](https://www.json.org/json-en.html) to store data
 
 ## Supported data types
 
@@ -49,8 +49,19 @@ When you request data using `kv_get` function, data will be automatically conver
 
 ## Usage
 
+- [Init](#initialize-database)
+- [Create](#create)
+- [Load](#load)
+- [Get](#get)
+- [Set / Update](#set--update)
+- [Merge](#merge)
+- [Index](#index)
+- [Query](#query)
+- [Search](#search)
 
-##### Initialize database
+---
+
+### Initialize database
 ```py
 from kivi import Kivi
 
@@ -63,7 +74,9 @@ db = Kivi(
 > `to_load` only takes json file with default kivi format.
 > If you want to store regular json data use [create](#create) or [merge](#merge)
 
-##### Create
+---
+
+### Create
 Creates a new database and load it to the memory
 
 - Arguments:
@@ -75,7 +88,29 @@ Creates a new database and load it to the memory
     db.kv_create("wow", {"user-1": 123456})
     ```
 
-##### Get
+---
+
+### Load
+
+> [!Note]
+> It is recommended to load databases when initializing the database with `Kivi(to_load=[...])`
+
+Loads database into the memory
+
+- Arguments:
+    - data: Path to a json file or python dict
+        
+- Returns:
+    Index of the database
+
+- Example:
+    ```py
+    db.kv_load("/home/test/data/stuff.json")
+    ```
+
+---
+
+### Get
 Get value from a database
 
 - Arguments:
@@ -87,7 +122,9 @@ Get value from a database
     db.kv_get(0, "greeting")
     ```
 
-##### Set / Update
+---
+
+### Set / Update
 Add or update key in a database
 
 - Arguments:
@@ -98,8 +135,9 @@ Add or update key in a database
     ```py
     db.kv_set(0, "gtr1", "greeting")
     ```
+---
 
-##### Merge
+### Merge
 Merge data into the database
 
 - Arguments:
@@ -118,7 +156,44 @@ Merge data into the database
 > [!Note]
 > If the `tomerge` dict is not in the kivi formatting, set `to_std = True`
 
-##### Search
+---
+
+### Index
+Index data to perform queries much faster
+
+-Arguments:
+    - `data`: Data to index (a dict or list of dicts)
+    - `fields`: Json fields that needs to be indexed
+    - `chars`: Amount of characters that indexed key can have (Ex: "Spider" will be sliced to "spi" to create the key for index)
+        
+- Example:
+    ```py
+    data = [
+        {"title": "Spooder man", "extract": "Marvel spooder man!"},
+        {"title": "Iron deficiency man", "extract": "Marvel no Fe?"}
+    ]
+    db.kv_index(data, ["title", "extract"], 3)
+    ```
+
+---
+
+### Query
+**WIP**
+
+Search for string in an indexed database
+
+- Arguments:
+    - `index`: Index of the database (returned in kv_load or when creating the instance)
+    - `query`: String to search for in the database
+
+- Example:
+    ```py
+    db.kv_query(0, "Spider man")
+    ```
+
+---
+
+### Search
 Search for string in a database
 
 - Arguments:
@@ -131,19 +206,6 @@ Search for string in a database
     db.kv_search(0, "Spider man")
     ```
 
-##### Load
-Loads database into the memory
-
-- Arguments:
-    - data: Path to a json file or python dict
-        
-- Returns:
-    Index of the database
-
-- Example:
-    ```py
-    db.kv_load("/home/test/data/stuff.json")
-    ```
 
 ## Requirements
 
