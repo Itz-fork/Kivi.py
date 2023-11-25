@@ -1,15 +1,13 @@
 # Author: https://github.com/Itz-fork
 # Project: Kivi.py
 
-import json, re, sys
+import json, re
 from os import path, getcwd, mkdir
 
 from kivi.extensions.converter import data_conv
-from kivi.extensions.tools import run_on_thread, slice_dict
+from kivi.extensions.handlers import run_on_thread, handle_erros
 
 from kivi.erros import KV_NODATA
-
-# sys.
 
 
 class Kivi(object):
@@ -31,6 +29,7 @@ class Kivi(object):
             for db in to_load:
                 self.kv_load(db)
 
+    @handle_erros
     def kv_create(self, name: str, data: dict):
         """
         Creates a new database and load it to the memory
@@ -45,9 +44,10 @@ class Kivi(object):
             ```
         """
         _tmpdb = {"name": name}
-        _tmpdb["items"] = self._kv_format(data)
+        _tmpdb["items"] = self._kv_format(data=data)
         self._kv_save(data=_tmpdb)
 
+    @handle_erros
     def kv_load(self, data: dict | str) -> int:
         """
         Loads database into the memory
@@ -74,6 +74,7 @@ class Kivi(object):
         self.KV_DB.append(kvdt)
         return len(self.KV_DB) - 1
 
+    @handle_erros
     def kv_get(self, index: int, key: str):
         """
         Get key from a database
@@ -87,12 +88,10 @@ class Kivi(object):
             db.kv_get(0, "greeting")
             ```
         """
-        try:
-            frm_db = self.KV_DB[index]["items"][key]
-            return data_conv(frm_db[0], frm_db[1])
-        except KeyError as e:
-            raise KeyError(f"Value doesn't exists in database at index {index}") from e
+        frm_db = self.KV_DB[index]["items"][key]
+        return data_conv(frm_db[0], frm_db[1])
 
+    @handle_erros
     def kv_merge(self, index: int, tomerge: dict, to_std: bool = True):
         """
         Merge data into the database
@@ -115,10 +114,11 @@ class Kivi(object):
         """
         _svdb = self.KV_DB[index]["items"]
         if to_std:
-            tomerge = self._kv_format(tomerge)
+            tomerge = self._kv_format(data=tomerge)
         self.KV_DB[index]["items"] = {**_svdb, **tomerge}
         self._kv_save(index=index)
 
+    @handle_erros
     def kv_set(self, index: int, key: str, data):
         """
         Add key to a database
@@ -132,18 +132,12 @@ class Kivi(object):
             db.kv_set(0, "gtr1", "greeting")
             ```
         """
-        try:
-            self.KV_DB[index]["items"][key] = [str(data), type(data).__name__]
-            # Save the file
-            self._kv_save(index=index)
-            return index
-        except KeyError as e:
-            raise KeyError(f"Value doesn't exists in database at index {index}") from e
-        except IndexError as e:
-            raise IndexError(
-                f"{e} \n\nPerhaps you forgot to run `db.kv_load(path)` ?"
-            ) from e
+        self.KV_DB[index]["items"][key] = [str(data), type(data).__name__]
+        # Save the file
+        self._kv_save(index=index)
+        return index
 
+    @handle_erros
     def kv_search(self, index: int, query: str, strict: bool = True):
         """
         Search for string in a database
@@ -162,9 +156,12 @@ class Kivi(object):
         _sfnc = re.match if strict else re.search
         qry = query.split(" ")
         rgx = (
-            r"(?i)([+" + qry.pop(0) + "]+\s)" + "".join(f"|(\b[+{i}]+\s)" for i in qry)
+            r"(?i)([+"
+            + qry.pop(0)
+            + r"]+\s)"
+            + "".join(rf"|(\b[+{i}]+\s)" for i in qry)
             if len(qry) > 1
-            else f"(?i)([+{query}]+\s)"
+            else rf"(?i)([+{query}]+\s)"
         )
         return list(
             filter(
@@ -176,6 +173,7 @@ class Kivi(object):
             )
         )
 
+    @handle_erros
     def kv_query(self, index: int, query: str, chars: int = 3):
         """
         WIP
@@ -189,7 +187,7 @@ class Kivi(object):
 
         Example:
             ```py
-            db.kv_query(0, "Spider man")
+            db.kv_query(0, "Spiderman")
             ```
         """
         query = query.lower()
@@ -205,14 +203,24 @@ class Kivi(object):
                     results.append(itm["origin"])
         return results
 
-    def kv_index(self, data: dict | list, fields: list, chars: int = 3):
+    @handle_erros
+    def kv_index(
+        self,
+        name: str,
+        data: dict | list,
+        fields: list,
+        chars: int = 3,
+        min_chrs: int = 4,
+    ):
         """
         Index data to perform queries much faster
 
         Arguments:
+            name: Name of the indexed database (Ex: single: "movie_index")
             data: Data to index (a dict or list of dicts)
             fields: Json fields that needs to be indexed
             chars: Amount of characters that indexed key can have (Ex: "Spider" will be sliced to "spi" to create the key for index)
+            min_chrs: Minimum length of a searchable word
 
         Example:
             ```py
@@ -236,8 +244,8 @@ class Kivi(object):
                 if k in fields:
                     _lvrs = [re.sub("\W+", "", _spl) for _spl in str(v).split(" ")]
                     for _tv in _lvrs:
-                        if not _tv:
-                            pass
+                        if not _tv or len(_tv) < min_chrs:
+                            continue
                         _vchr = str(_tv)[:chars].lower()
                         _rs = _tmal.get(_vchr)
                         if _rs:
@@ -250,9 +258,10 @@ class Kivi(object):
                 index_from_fields(di)
         else:
             index_from_fields(data)
+        self._kv_save(name=name, data=_tmal)
         print("Indexing finished")
-        self._kv_save(name="movie_indexed", data=_tmal)
 
+    @handle_erros
     def _kv_format(self, data: dict) -> dict:
         return dict(
             map(
@@ -262,6 +271,7 @@ class Kivi(object):
         )
 
     @run_on_thread
+    @handle_erros
     def _kv_save(self, name: str = None, index: int = None, data: dict = None):
         """
         Save the database into a json file
@@ -277,4 +287,4 @@ class Kivi(object):
                 json.dump(_svdb, tosav, indent=4, ensure_ascii=False)
                 # tosav.truncate()
         else:
-            raise KV_NODATA("_kv_save: Used to save the database into a json file")
+            raise KV_NODATA

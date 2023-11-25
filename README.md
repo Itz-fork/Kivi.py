@@ -82,7 +82,7 @@ Creates a new database and load it to the memory
 Loads database into the memory
 
 - Arguments:
-    - data: Path to a json file or python dict
+    - `data`: Path to a json file or python dict
         
 - Returns:
     Index of the database
@@ -125,8 +125,8 @@ Add or update key in a database
 Merge data into the database
 
 - Arguments:
-    - index: Index of the database (returned in kv_load or when creating the instance)
-    - tomerge: Dict consist of data that needs to be merged
+    - `index`: Index of the database (returned in kv_load or when creating the instance)
+    - `tomerge`: Dict consist of data that needs to be merged
 
 - Example:
     ```py
@@ -143,7 +143,6 @@ Merge data into the database
 ---
 
 ### Index
-**WIP**
 
 Index data to perform queries much faster
 
@@ -164,7 +163,6 @@ Index data to perform queries much faster
 ---
 
 ### Query
-**WIP**
 
 Search for string in an indexed database
 
